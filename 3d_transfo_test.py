@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 
-
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.set_title("3D transformations")
@@ -33,7 +32,6 @@ poly = Poly3DCollection(vertexes)
 poly.set_color(colors[0] + alpha)
 poly.set_edgecolor(colors[0])
 ax.add_collection3d(poly)
-
 
 
 m_scaling = np.array([
