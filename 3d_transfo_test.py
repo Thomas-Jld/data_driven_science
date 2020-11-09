@@ -13,6 +13,9 @@ transformations = ["Original", "X scaling", "75° rotation", "Z Translation"]
 colors = ["#e66101", "#fdb863", "#b2abd2", "#5e3c99"]
 alpha = "d0"
 
+"""
+Drawing the original
+"""
 points = np.array([
     [1, 1, 0],
     [3, 4, 0],
@@ -33,7 +36,9 @@ poly.set_color(colors[0] + alpha)
 poly.set_edgecolor(colors[0])
 ax.add_collection3d(poly)
 
-
+"""
+Scaling x2 on X axis
+"""
 m_scaling = np.array([
     [2, 0, 0],
     [0, 1, 0],
@@ -50,7 +55,9 @@ poly1.set_color(colors[1] + alpha)
 poly1.set_edgecolor(colors[1])
 ax.add_collection3d(poly1)
 
-
+"""
+75° rotation on Z axis
+"""
 theta = np.pi*75/180
 
 m_rotation = np.array([
@@ -68,7 +75,9 @@ poly2.set_color(colors[2] + alpha)
 poly2.set_edgecolor(colors[2])
 ax.add_collection3d(poly2)
 
-
+"""
++3 Translation on Z axis
+"""
 m_translation = np.array([0, 0, 3])
 
 points3 = points2 + m_translation
