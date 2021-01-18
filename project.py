@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt 
 import time
 
@@ -26,12 +27,10 @@ def nb_to_date(nb: int) -> str:
 
 
 class DynamicUpdate():
-
     def __init__(self,pop: list, tests: list):
         self.pop = pop
         self.tests = tests
-        # self.min_x = date_to_nb(self.tests["data"][0][1])
-        # self.max_x = date_to_nb(self.tests["data"][-1][1])
+
 
     def on_launch(self):
         self.figure = plt.figure()
@@ -41,42 +40,69 @@ class DynamicUpdate():
 
 
     def on_running(self, xdata, ydata, date):
-        
-        if len(self.ax1.lines) != 0:
-            self.ax1.lines = []
 
-        if len(self.ax1.collections) != 0:
-            self.ax1.collections = []
+        plt.cla()
 
-        self.ax1.plot(xdata,ydata, label="1st")
+        self.ax1.bar(xdata,ydata, color='r')
+        self.ax1.get_yaxis().set_major_formatter(
+            matplotlib.ticker.FuncFormatter(lambda x, p: "%.4f" % x))
         self.ax1.set_xticks(['01','27','50','75','976'])
-        self.ax1.set_title(f'Pourcentage de personnes testé par département   Date: {date}')
+        self.ax1.set_title(f'Pourcentage de personnes testé positive par département   Date: {nb_to_date(date)}')
         self.ax1.set_xlabel("Numéro de Département")
         self.ax1.set_ylabel("Pourcentage de personne positive")
         plt.draw() 
-        plt.pause(0.5)
+        plt.pause(2)
 
-       
-        
+        plt.savefig(f"saved_files/{date}.png")
+
+        self.ax1.lines = []
+        self.ax1.collections = []
+
+
+    def instant(self, xdata, ydata):
+
+        plt.cla()
+
+        self.ax1.bar(xdata,ydata, color='grey')
+        self.ax1.get_yaxis().set_major_formatter(
+            matplotlib.ticker.FuncFormatter(lambda x, p: "%.4f" % x))
+        self.ax1.set_xticks(['01','27','50','75','95','976'])
+        self.ax1.set_title(f'Pourcentage de personnes testé positive par département cumulé sur 2 mois')
+        self.ax1.set_xlabel("Numéro de Département")
+        self.ax1.set_ylabel("Pourcentage de personne positive")
+        plt.draw() 
+        plt.pause(2)
+
+        plt.savefig(f"saved_files/Cumul.png")
+
 
     def __call__(self):
         self.on_launch()
         dates = list(range(date_to_nb(self.tests["data"][0][1]), date_to_nb(self.tests["data"][-1][1])))
+        cum_y = {}
+        data = []
 
         for d in dates:
-
             data = []
             for r in self.tests["data"]:
                 if r[2] == "0" and date_to_nb(r[1]) == d:
                     dpt = r[0]
-                    part = round(100*float(r[4])/float(self.pop["E:Total"][self.pop["Dpt_id"].index(r[0])]),3)
+                    part = round(
+                        100*float(r[4])/float(self.pop["E:Total"][self.pop["Dpt_id"].index(r[0])]),
+                        3)
+                    if dpt in cum_y:
+                        cum_y[dpt] += part
+                    else:
+                        cum_y[dpt] = part
+
                     data.append([dpt, part])
             data = np.array(data).T
             print(data)
             # data = np.array(
-            #     [[r[0], float(r[4])/float(self.pop["Total"][self.pop["Dpt_id"].index(r[0])])]
+            #     [[r[0], 100*float(r[4])/float(self.pop["Total"][self.pop["Dpt_id"].index(r[0])])]
             #      for r in self.tests if r[2] == "0" and  date_to_nb(r[1]) == d]).T
-            self.on_running(data[0], data[1].astype(float), nb_to_date(d))
+            # self.on_running(data[0], data[1].astype(float), d)
+        self.instant(data[0], cum_y.values())
         return data[0], data[1]
 
 
@@ -92,7 +118,7 @@ def graph_simple(pop: list, tests: list) -> None:
             data.append([dpt, part])
     data = np.array(data).T
     ax1.plot(data[0], data[1].astype(float))
-    ax1.set_xticks(['01','27','75','976'])
+    ax1.set_xticks(['01','27','75','95','976'])
     plt.show()
 
 
@@ -125,6 +151,7 @@ def flatten(tests_data: list):
                 new_data[-1][i] = str(float(row[i])+float(new_data[-1][i]))
             last = row[2]
     return new_data
+
 
 if __name__ == "__main__":
     pop_data = get_population_data("pop.csv")
